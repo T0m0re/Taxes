@@ -6,7 +6,7 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   return <>
-    <Navbar/>
+    {/* <Navbar/> */}
   {children}
   </>
 }
