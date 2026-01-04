@@ -29,13 +29,16 @@ interface TaxState {
 
 type TaxAction =
   | { type: 'ADD_INCOME'; payload: IncomeItem }
-  | { type: 'UPDATE_INCOME'; payload: IncomeItem }
+| { type: 'UPDATE_INCOME'; payload:  {
+        incomeType: IncomeType;
+        amount: number;
+        }; }
   | { type: 'REMOVE_INCOME'; payload: string }
 | { type: 'SET_ERROR'; payload: string | null };
 
 interface TaxActions {
 addIncome: (income: IncomeItem) => void;
-updateIncome: (income: IncomeItem) => void;
+updateIncome: (incomeType: IncomeType, amount: number) => void;
 removeIncome: (id: string) => void;
 
 }
@@ -66,16 +69,14 @@ const taxReducer = (state : TaxState, action: TaxAction) => {
         error: null
         };
     case 'UPDATE_INCOME': {
-      const newIncomes = state.income.map(income =>
-        income.type === action.payload.type
-          ? { ...income, ...action.payload }
-          : income
-      );
-      
-      
-      return {
+    return {
         ...state,
-        incomes: newIncomes,
+        income: state.income.map((item) =>
+          item.type === action.payload.incomeType
+            ? { ...item, amount: action.payload.amount }
+            : item
+        ),
+        error: null,
       };
     }
     default:
@@ -98,13 +99,13 @@ export const TaxProvider = ({ children} : TaxProviderProps) => {
       dispatch({ type: 'ADD_INCOME', payload: income });
     },
 
-    updateIncome: (income) => {
-      if (income.amount < 0) {
+    updateIncome: (incomeType: IncomeType, amount: number) => {
+      if (amount < 0) {
         dispatch({ type: 'SET_ERROR', payload: 'Income amount cannot be negative' });
         return;
       }
-      dispatch({ type: 'UPDATE_INCOME', payload: income },)
-      console.log({income})
+      dispatch({ type: 'UPDATE_INCOME', payload: { incomeType, amount } },)
+      console.log({amount, incomeType})
     },
 
     removeIncome: (id) => {

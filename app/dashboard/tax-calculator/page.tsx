@@ -10,11 +10,41 @@ import { Printer } from "lucide-react";
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 
+type Block = {
+  id: number;
+  name: string;
+  amount: number;
+};
 
 const TaxCalculator = () => {
     const { state, actions } = useTax();
-    console.log(state.income)
+ 
     const [selected, setSelected] = useState<"pit" | "paye">("pit");
+    const [incomeBlocks, setIncomeBlocks] = useState<Block[]>([]);
+    const [deductionBlocks, setDeductionBlocks] = useState<Block[]>([]);
+
+     const addBlock = (incomeType: string, amount: number, blockType: string) => {
+        if (blockType === "Income") {
+            setIncomeBlocks((prev) => [
+      ...prev,
+      {
+        id: prev.length,
+        name: incomeType,
+        amount,
+      },
+    ]);
+        } else {
+            setDeductionBlocks((prev) => [
+                ...prev,
+                {
+                    id: prev.length,
+        name: incomeType,
+        amount,
+                }
+            ])
+        }
+    
+  };
 
   return (
     <main className="w-[95%] mx-auto my-5">
@@ -51,13 +81,12 @@ const TaxCalculator = () => {
                         <p className="text-lg font-bold">Income Sources</p>
                         <span className="text-xs text-gray-500">Only fill the income that apply to you.</span>
                     </div>
-                   <PopoverMenu label="income"/>
+                   <PopoverMenu label="income" addBlock={addBlock}/>
                 </div>
 
-                <div className="w-full flex flex-col gap-4">
-                    
-                        <div className="flex gap-4">
-                            <div className="w-full flex flex-col items-start gap-1">
+                
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="w-full flex flex-col items-start gap-1">
                                 <Label htmlFor="income" className="font-medium text-sm text-gray-500">Annual Salary</Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
                                     <span className="text-black/70 text-lg">₦</span>
@@ -72,7 +101,7 @@ const TaxCalculator = () => {
                                     onValueChange={(value, name, values) => console.log(value, name, values)}
                                     />
                                 </div>
-                            </div>
+                        </div>
                             <div className="w-full flex flex-col items-start gap-1">
                                 <Label htmlFor="income" className="font-medium text-sm text-gray-500">Allowances <span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
@@ -87,46 +116,25 @@ const TaxCalculator = () => {
                                     />
                                 </div>
                             </div>
-                        </div>
-
-                    <div className="flex flex-col gap-1">
-                        <div id="Employement Income" className="flex items-center justify-between w-full">
-                            <h3>Digital & Remote Income</h3>
-                            <Button variant="link" className="text-blue-500 hover:text-blue-700/85 text-sm font-medium cursor-pointer">+Add</Button>
-                        </div>
-
-                        <div className="flex gap-4">
-                            <div className="w-full flex flex-col items-start gap-1">
-                                <Label htmlFor="income" className="font-medium text-sm text-gray-500">Annual Salary</Label>
+                            {incomeBlocks.map(({id, amount, name}) => (
+                                <div key={id} className="w-full flex flex-col items-start gap-1">
+                                <Label htmlFor="income" className="font-medium text-sm text-gray-500">{name}<span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
                                     <span className="text-black/70 text-lg">₦</span>
                                     <CurrencyInput
-                                        className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
-                                        id="input-example"
-                                        name="input-name"
-                                        placeholder="Profits from trade or business"
-                                        decimalsLimit={2}
-                                        onValueChange={(value, name, values) => console.log(value, name, values)}
+                                    className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
+                                    id="input-example"
+                                    name="input-name"
+                                    value={amount}
+                                    placeholder="Housing Allowance"
+                                    decimalsLimit={2}
+                                    onValueChange={(value, name, values) => console.log(value, name, values)}
                                     />
                                 </div>
                             </div>
-                            <div className="w-full flex flex-col items-start gap-1">
-                                <Label htmlFor="income" className="font-medium text-sm text-gray-500">Allowances <span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
-                                <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
-                                    <span className="text-black/70 text-lg">₦</span>
-                                    <CurrencyInput
-                                        className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
-                                        id="input-example"
-                                        name="input-name"
-                                        placeholder="Professional fees"
-                                        decimalsLimit={2}
-                                        onValueChange={(value, name, values) => console.log(value, name, values)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                            ))}
                     </div>
-                </div>
+                
             </div>
 
             <div className="flex flex-col  gap-4 w-full p-4 border shadow-xs rounded">
@@ -135,11 +143,10 @@ const TaxCalculator = () => {
                         <p className="text-lg font-bold">Deductables</p>
                         <span className="text-xs text-gray-500">Only fill the deductables that apply to you.</span>
                     </div>
-                    <PopoverMenu label="deductions"/>
+                    <PopoverMenu label="deductions" addBlock = {addBlock}/>
                 </div>
 
-                <div className="w-full flex flex-col gap-4">
-                    <div className="flex max-sm:flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="w-full flex flex-col items-start gap-1">
                             <Label htmlFor="income" className="font-medium text-sm text-gray-500">Rent Relief</Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
@@ -168,8 +175,25 @@ const TaxCalculator = () => {
                                         />
                                     </div>
                                 </div>
+                                 {deductionBlocks.map(({id, amount, name}) => (
+                                <div key={id} className="w-full flex flex-col items-start gap-1">
+                                <Label htmlFor="income" className="font-medium text-sm text-gray-500">{name}<span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
+                                <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
+                                    <span className="text-black/70 text-lg">₦</span>
+                                    <CurrencyInput
+                                    className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
+                                    id="input-example"
+                                    name="input-name"
+                                    value={amount}
+                                    placeholder="Housing Allowance"
+                                    decimalsLimit={2}
+                                    onValueChange={(value, name, values) => console.log(value, name, values)}
+                                    />
+                                </div>
+                            </div>
+                            ))}
                     </div>
-                </div>
+               
             </div>
         </div>
         <aside className="flex flex-col gap-4 lg:col-span-5 xl:col-span-4">

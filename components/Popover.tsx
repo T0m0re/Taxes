@@ -14,31 +14,45 @@ import {
 } from "@/components/ui/select"
 import { Button } from "./ui/button"
 import CurrencyInput from "react-currency-input-field"
+import { useState } from "react"
 
 
 interface Popover {
 label : string
+addBlock: any
 }
 
 
-const PopoverMenu = ({ label } : Popover) => {
-    const selectlabel = label === "income" ? "Income Source" : "Deductions"
+const PopoverMenu = ({ label, addBlock } : Popover) => {
+
+    const selectlabel = label === "income" ? "Income Source" : "Deductions";
     const selectItems = label === "income" ? [
         {value: "freelance", name: "Freelance"},
         {value: "interest", name: "Interest"},
         {value: "dividened", name: "Dividend"},
         {value: "capital_gain", name: "Capital Gain"},
         {value: "others", name: "Others"},
-    ] : [
-        {value: "tit", name: "Titties"}
-    ]
+        ] : [
+        {value: "tit", name: "Titties"}];
+    const blockType = label === "income" ? "Income" : "Deduction"
+
+    const [incomeType, setIncomeType] = useState<string>('');
+    const [name, setName] = useState<string>('');
+    const [amount, setAmount] = useState<number>();
+    const [open, setOpen] = useState(false)
+
+    const handleSubmit = () => {
+        if (!incomeType) return;
+        addBlock(incomeType, amount, blockType)
+        setOpen(false)
+    };
   return (
-     <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
             <Button variant="link" className="text-blue-500 hover:text-blue-700/85 text-sm font-medium cursor-pointer">+Add Other {label === "income" ? "Income Source" : "Deductables"}</Button>
-            </PopoverTrigger>
-            <PopoverContent className="border shadow rounded p-4 flex flex-col gap-3">
-                <Select >
+        </PopoverTrigger>
+        <PopoverContent className="border shadow rounded p-4 flex flex-col gap-3">
+                <Select onValueChange={setIncomeType} value={incomeType}>
                     <SelectTrigger className="w-full rounded">
                         <SelectValue placeholder={label === "income" ? "Select an Income" : "Choose Deductables"} />
                     </SelectTrigger>
@@ -53,18 +67,16 @@ const PopoverMenu = ({ label } : Popover) => {
                 </Select>
 
                 <CurrencyInput
-                                    className="shadow border text-base text-gray-700 rounded-none w-full focus-within:outline-0 p-2"
-                                    id="annual_salary"
-                                    name="Annual Gross Income"
-                                    defaultValue="123"
-                                    placeholder="Amount"
-                                    decimalsLimit={2}
-                                    onValueChange={(value, name, values) => console.log(value, name, values)}
-                            />
-
-                            <Button className="bg-blue-500 hover:bg-blue-700 transition-colors rounded">Add</Button>
-                        </PopoverContent>
-                    </Popover>
+                    className="shadow border text-base text-gray-700 rounded-none w-full focus-within:outline-0 p-2"
+                    id="annual_salary"
+                    name={incomeType}
+                    placeholder="Amount"
+                    decimalsLimit={2}
+                    onValueChange={(value) => setAmount(Number(value))}
+                />
+            <Button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 transition-colors rounded">Add</Button>
+        </PopoverContent>
+    </Popover>
   )
 }
 export default PopoverMenu

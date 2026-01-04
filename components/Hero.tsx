@@ -16,7 +16,7 @@ const Hero = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        actions.updateIncome({type: 'annual_salary', amount: Number(income)})
+        actions.updateIncome('annual_salary', Number(income))
         router.push('/dashboard/tax-calculator');
     }
   return (
