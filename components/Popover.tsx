@@ -15,21 +15,25 @@ import {
 import { Button } from "./ui/button"
 import CurrencyInput from "react-currency-input-field"
 import { useState } from "react"
+import { useTax } from "@/context/TaxCalculatorContext"
 
 
 interface Popover {
 label : string
 addBlock: any
+
 }
 
 
 const PopoverMenu = ({ label, addBlock } : Popover) => {
+    const [amount, setAmount] = useState<number>();
+
+    const { state, actions } = useTax();
 
     const selectlabel = label === "income" ? "Income Source" : "Deductions";
     const selectItems = label === "income" ? [
         {value: "freelance", name: "Freelance"},
-        {value: "interest", name: "Interest"},
-        {value: "dividened", name: "Dividend"},
+        {value: "dividend", name: "Dividend"},
         {value: "capital_gain", name: "Capital Gain"},
         {value: "others", name: "Others"},
         ] : [
@@ -37,13 +41,12 @@ const PopoverMenu = ({ label, addBlock } : Popover) => {
     const blockType = label === "income" ? "Income" : "Deduction"
 
     const [incomeType, setIncomeType] = useState<string>('');
-    const [name, setName] = useState<string>('');
-    const [amount, setAmount] = useState<number>();
     const [open, setOpen] = useState(false)
 
     const handleSubmit = () => {
         if (!incomeType) return;
         addBlock(incomeType, amount, blockType)
+        actions.updateIncome(incomeType, amount)
         setOpen(false)
     };
   return (

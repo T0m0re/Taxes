@@ -26,3 +26,21 @@ export function getAnnualSalaryAmount(income: IncomeItem[]): number {
 
   return annualSalary?.amount ?? 0;
 }
+
+export function formatInputIdToName(inputId: string): string {
+  return inputId
+    .replace(/[-_]/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+export const formatCurrency = (amount: number) => {
+  if (!amount) return 0
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: "NGN",
+    currencyDisplay: "symbol",
+  }).format(amount);
+};

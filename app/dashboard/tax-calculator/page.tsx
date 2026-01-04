@@ -4,8 +4,8 @@ import PopoverMenu from "@/components/Popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { useTax } from "@/context/TaxCalculatorContext";
-import { getAnnualSalaryAmount } from "@/lib/utils";
+import { DeductionType, IncomeType, useTax } from "@/context/TaxCalculatorContext";
+import { formatCurrency, formatInputIdToName, getAnnualSalaryAmount } from "@/lib/utils";
 import { Printer } from "lucide-react";
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
@@ -23,29 +23,32 @@ const TaxCalculator = () => {
     const [incomeBlocks, setIncomeBlocks] = useState<Block[]>([]);
     const [deductionBlocks, setDeductionBlocks] = useState<Block[]>([]);
 
+
      const addBlock = (incomeType: string, amount: number, blockType: string) => {
         if (blockType === "Income") {
             setIncomeBlocks((prev) => [
-      ...prev,
-      {
+        ...prev,
+        {
         id: prev.length,
         name: incomeType,
         amount,
-      },
+        },
     ]);
         } else {
             setDeductionBlocks((prev) => [
                 ...prev,
                 {
                     id: prev.length,
-        name: incomeType,
-        amount,
+                    name: incomeType,
+                    amount,
                 }
             ])
         }
-    
-  };
+    };
 
+    const onValueChange = (value: number, name: string) => {
+        actions.updateIncome(name as IncomeType, value)
+    }
   return (
     <main className="w-[95%] mx-auto my-5">
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -93,12 +96,12 @@ const TaxCalculator = () => {
                                     <CurrencyInput
                                     className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
                                     id="annual_salary"
-                                    name="Annual Gross Income"
-                                    defaultValue="123"
-                                    placeholder={String(getAnnualSalaryAmount(state.income))}
-                                    value={getAnnualSalaryAmount(state.income)}
+                                    name="annual_salary"
+                                    defaultValue={String(getAnnualSalaryAmount(state.income))}
+                                    placeholder="Anuual Income"
                                     decimalsLimit={2}
-                                    onValueChange={(value, name, values) => console.log(value, name, values)}
+                                    onValueChange={(_, name, values) => onValueChange(values?.float, name as IncomeType)}
+                                        
                                     />
                                 </div>
                         </div>
@@ -107,28 +110,28 @@ const TaxCalculator = () => {
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
                                     <span className="text-black/70 text-lg">₦</span>
                                     <CurrencyInput
-                                    className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
-                                    id="input-example"
-                                    name="input-name"
+                                    className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2 "
+                                    id="allowance"
+                                    name="allowance"
                                     placeholder="Housing Allowance"
                                     decimalsLimit={2}
-                                    onValueChange={(value, name, values) => console.log(value, name, values)}
+                                    onValueChange={(_, name, values) => onValueChange(values?.float, name as IncomeType)}
                                     />
                                 </div>
                             </div>
-                            {incomeBlocks.map(({id, amount, name}) => (
+                            {incomeBlocks.map(({id, name, amount}) => (
                                 <div key={id} className="w-full flex flex-col items-start gap-1">
-                                <Label htmlFor="income" className="font-medium text-sm text-gray-500">{name}<span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
+                                <Label htmlFor="income" className="font-medium text-sm text-gray-500">{formatInputIdToName(name)}<span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
                                     <span className="text-black/70 text-lg">₦</span>
                                     <CurrencyInput
-                                    className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
-                                    id="input-example"
-                                    name="input-name"
-                                    value={amount}
-                                    placeholder="Housing Allowance"
+                                    className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2 placeholder:capitalize"
+                                    id={name}
+                                    name={name}
+                                    defaultValue={amount}
+                                    placeholder={formatInputIdToName(name)}
                                     decimalsLimit={2}
-                                    onValueChange={(value, name, values) => console.log(value, name, values)}
+                                    onValueChange={(_, name, values) => onValueChange(values?.float, name as IncomeType)}
                                     />
                                 </div>
                             </div>
@@ -148,16 +151,16 @@ const TaxCalculator = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="w-full flex flex-col items-start gap-1">
-                            <Label htmlFor="income" className="font-medium text-sm text-gray-500">Rent Relief</Label>
+                            <Label htmlFor="income" className="font-medium text-sm text-gray-500">Annual Rent</Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
                                     <span className="text-black/70 text-lg">₦</span>
                                     <CurrencyInput
                                     className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
-                                    id="input-example"
-                                    name="input-name"
+                                    id="annual_rent"
+                                    name="annual_rent"
                                     placeholder="Rent Relief"
                                     decimalsLimit={2}
-                                    onValueChange={(value, name, values) => console.log(value, name, values)}
+                                    onValueChange={(name, values) => actions.updateDeduction( values!.float , name as DeductionType)}
                                     />
                                     </div>
                                 </div>
@@ -171,11 +174,11 @@ const TaxCalculator = () => {
                                         name="input-name"
                                         placeholder="NHF Contributions"
                                         decimalsLimit={2}
-                                        onValueChange={(value, name, values) => console.log(value, name, values)}
+                                        onValueChange={(value, name, values) => console.log(value, name, values?.float)}
                                         />
                                     </div>
                                 </div>
-                                 {deductionBlocks.map(({id, amount, name}) => (
+                                 {deductionBlocks.map(({id, name}) => (
                                 <div key={id} className="w-full flex flex-col items-start gap-1">
                                 <Label htmlFor="income" className="font-medium text-sm text-gray-500">{name}<span className="bg-gray-300 rounded-full w-4 h-4 text-center text-xs">?</span></Label>
                                 <div className="flex items-center gap-2 bg-white w-full rounded py-2 px-4 border">
@@ -184,7 +187,6 @@ const TaxCalculator = () => {
                                     className="shadow-none border-0 text-base text-gray-700  border-l rounded-none w-full focus-within:outline-0 pl-2"
                                     id="input-example"
                                     name="input-name"
-                                    value={amount}
                                     placeholder="Housing Allowance"
                                     decimalsLimit={2}
                                     onValueChange={(value, name, values) => console.log(value, name, values)}
@@ -216,7 +218,7 @@ const TaxCalculator = () => {
                     <div className="flex flex-col gap-2 pb-3 border-b-2 border-gray-400/50">
                         <div className="flex items-center justify-between ">
                             <p>Estimated Income</p>
-                            <p className="text-lg font-bold text-green-400">₦5,000,000</p>
+                            <p className="text-lg font-bold text-green-400">{formatCurrency(state.totalIncome)}</p>
                         </div>
                     
                         <div>
@@ -234,7 +236,7 @@ const TaxCalculator = () => {
                 </div>
 
                 <div className="px-2 py-5 bg-gray-100 w-full flex gap-4 shadow">
-                    <Button className="flex-3 bg-blue-600 hover:bg-blue-800 px-8 py-5 rounded cursor-pointer">Recalculate</Button>
+                    <Button className="flex-3 bg-blue-600 hover:bg-blue-800 px-8 py-5 rounded cursor-pointer">Calculate</Button>
                     <Button className="flex-1 bg-white hover:bg-white/90 py-5 rounded cursor-pointer"><Printer className="text-black size-6"/></Button>
                 </div>
             </div>
@@ -245,7 +247,7 @@ const TaxCalculator = () => {
                 <div className="flex flex-col items-stretch gap-4">
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-black/60">Total Income:</p>
-                        <span className="text-sm font-medium">$100,000</span>
+                        <span className="text-sm font-medium">{formatCurrency(state.totalIncome)}</span>
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -274,11 +276,7 @@ const TaxCalculator = () => {
                         <p>Total Taxeable Income:</p>
                         <span>$100,000</span>
                     </div>
-
-                    
                 </div>
-
-                    
                 </div>
             </aside>
         </section>
