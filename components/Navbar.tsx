@@ -10,8 +10,8 @@ const Navbar = () => {
             </Link>
 
             <div className="flex items-center justify-between gap-6">
-                <Link href="/resources">
-                    <p className="font-semibold text-black/70 hover:text-black transition-opacity">Resources</p>
+                <Link href="/learn">
+                    <p className="font-semibold text-black/70 hover:text-black transition-opacity">Learn</p>
                 </Link>
                 <Button className="bg-blue-600 hover:bg-blue-800 rounded cursor-pointer">Sign In</Button>
             </div>

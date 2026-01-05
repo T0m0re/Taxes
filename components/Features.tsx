@@ -2,7 +2,7 @@ import Image from "next/image"
 
 const Features = () => {
   return (
-    <section className="w-[90%] mx-auto my-10">
+    <section className="w-[95%] mx-auto my-10">
         <div className="flex flex-col gap-4">
             <div className="flex flex-col items-start">
                 <p className="bg-red-300 p-1.5 rounded text-base font-medium">Features</p>
